@@ -18,7 +18,7 @@ exports.conf = {
   enabled: true,
   guildOnly: false,
   aliases: [],
-  permLevel: "admin"
+  permLevel: "Bot Admin"
 };
 
 exports.help = {

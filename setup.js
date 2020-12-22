@@ -12,7 +12,8 @@ const defaultSettings = {
   "systemNotice": "true",
   "welcomeChannel": "welcome",
   "welcomeMessage": "Say hello to {{user}}, everyone! We all need a warm welcome sometimes :D",
-  "welcomeEnabled": "false"
+  "welcomeEnabled": "false",
+  "blacklist": "cunt"
 };
 
 const settings = new Enmap({
@@ -87,7 +88,7 @@ let prompts = [
     .replace("{{token}}", `"${answers.token}"`)
     .replace("{{intents}}", JSON.stringify(answers.intents));
 
-  fs.writeFileSync("./config.js", baseConfig);
+  // fs.writeFileSync("./config.js", baseConfig);
   console.log("REMEMBER TO NEVER SHARE YOUR TOKEN WITH ANYONE!");
   console.log("Configuration has been written, enjoy!");
   await settings.close();
