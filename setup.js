@@ -13,7 +13,7 @@ const defaultSettings = {
   "welcomeChannel": "welcome",
   "welcomeMessage": "Say hello to {{user}}, everyone! We all need a warm welcome sometimes :D",
   "welcomeEnabled": "false",
-  "blacklist": "cunt"
+  "blacklist": ['cunt']
 };
 
 const settings = new Enmap({

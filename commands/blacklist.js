@@ -5,9 +5,6 @@ exports.run = async (client, message, [action, ...value], level) => { // eslint-
   
   const settings = message.settings;
   const current = settings.blacklist
-  // client.message.send(`The current blacklist is: ${current}`)
-  // if (!client.settings.has(message.guild.id)) client.settings.set(message.guild.id, {});
-
   const joinedValue = value.join(" ");
 
     if (!action) return message.reply("Please specify a command.");
@@ -16,15 +13,18 @@ exports.run = async (client, message, [action, ...value], level) => { // eslint-
    		await message.reply(`The current blacklist is: \`\`\`\n${current}\n\`\`\``)
    } else
    if (action === "add") {
-   		var updated = current + "," + joinedValue
-   		var updated = updated.replace(/, /g, ",").replace(/,,/g, ",").replace(/\,$/, "").replace(/\,/, "")
-   		await client.settings.set(message.guild.id, updated, "blacklist");
-   		await message.reply(`\`\`\`\n${updated}\n\`\`\` has been added to the blacklist`)
+      await current.push(joinedValue)
+      await client.logger.log(current)
+   		await client.settings.set(message.guild.id, current, "blacklist");
+   		await message.reply(`\`\`\`\n${joinedValue}\n\`\`\` has been added to the blacklist`)
    } else
    if (action === "remove") {
-   		var updated = current.replace(`${joinedValue}`, "").replace(/, /g, ",").replace(/,,/g, ",").replace(/\,$/, "").replace(/\,/, "")
-   		await client.settings.set(message.guild.id, updated, "blacklist");
-   		await message.reply(`\`\`\`\n${updated}\n\`\`\` has been removed from the blacklist`)
+    if (!joinedValue) return message.reply("you need to specify a value");
+    pos = current.indexOf(joinedValue)
+    if (pos === -1) return message.reply("word not found in the blacklist");
+      current.splice(pos, 1)
+   		await client.settings.set(message.guild.id, current, "blacklist");
+   		await message.reply(`\`\`\`\n${joinedValue}\n\`\`\` has been removed from the blacklist`)
    } else {
    	await message.reply(`command entered was incorrect.`)
    }

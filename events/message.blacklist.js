@@ -11,10 +11,10 @@ module.exports = async (client, message) => {
   if (message.guild && !message.member) await message.guild.members.fetch(message.author);
 
 
-  const blacklist = String(settings.blacklist.toLowerCase()).split(",")
+  const blacklist = String(settings.blacklist).split(",")
   // client.logger.log(blacklist.some(word => message.content.toLowerCase().includes(word)))
 
-  if (settings.blacklist.toLowerCase()) {
+  if (String(blacklist)) {
     if (!message.content.includes("~blacklist remove")) {
       if (blacklist.some(word => message.content.toLowerCase().includes(word))) {
         message.delete()
