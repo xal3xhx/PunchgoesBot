@@ -10,12 +10,12 @@ module.exports = async (client, message) => {
   // If the member on a guild is invisible or not cached, fetch them.
   if (message.guild && !message.member) await message.guild.members.fetch(message.author);
 
-
+  // reads the blacklist into an array.
   const blacklist = String(settings.blacklist).split(",")
-  // client.logger.log(blacklist.some(word => message.content.toLowerCase().includes(word)))
 
+  // makes sure the blacklist contains something, prevents every message from being removed
   if (String(blacklist)) {
-    if (!message.content.includes("~blacklist remove")) {
+    if (!message.content.includes("~blacklist remove")) { // innores the blacklist remove command
       if (blacklist.some(word => message.content.toLowerCase().includes(word))) {
         message.delete()
         message.reply("You cant say that here, you have been warned!")

@@ -6,13 +6,18 @@ let baseConfig = fs.readFileSync("./config_base.txt", "utf8");
 
 const defaultSettings = {
   "prefix": "~",
-  "modLogChannel": "mod-log",
-  "modRole": "Moderator",
-  "adminRole": "Administrator",
-  "systemNotice": "true",
-  "welcomeChannel": "welcome",
+  "modRole": "Discord Mod",
+  "adminRole": "Admin",
+  "tmodRole": "Trial Mod",
+  "tadminRole": "Trial Admin",
+  "twitchMod": "Twitch Mod",
+  "SrAdmin": "SrAdmin",
+  "severManager": "Manager",
+  "systemNotice": "true", // This gives a notice when a user tries to run a command that they do not have permission to use.
   "welcomeMessage": "Say hello to {{user}}, everyone! We all need a warm welcome sometimes :D",
   "welcomeEnabled": "false",
+  "welcomeChannel": "welcome",
+  "modLogChannel": "mod-log",
   "blacklist": ['cunt']
 };
 

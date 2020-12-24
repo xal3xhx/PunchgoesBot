@@ -34,12 +34,12 @@ exports.conf = {
   enabled: true,
   guildOnly: false,
   aliases: [],
-  permLevel: "admin"
+  permLevel: "Admin"
 };
 
 exports.help = {
   name: "blacklist",
-  category: "blacklist",
-  description: "blacklist",
-  usage: "blacklist"
+  category: "Managment",
+  description: "automaticly removes a users message and warns then if they say one of the blacklisted words.",
+  usage: "blacklist [add/remove/view] {word}"
 };
