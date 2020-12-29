@@ -2,12 +2,12 @@ const http = require('https');
 const fs = require('fs');
 const util = require('util');
 const Enmap = require("enmap");
-let cache
 const enmapcache = new Enmap({name: "youtube cache"});
 const config = require("../config.js");
+const Discord = require('discord.js')
 settings = config
 
-exports.checkvideo = () => {
+exports.checkvideo = async (client) => {
 	const req = http.request({
 		hostname: `www.googleapis.com`,
 		port: 443,
@@ -18,23 +18,20 @@ exports.checkvideo = () => {
 		res.on('data', chunk => {
 			str += chunk;
 		});
-		res.on('end', () => {
+		res.on('end', async () => {
 			try {
 				const video = JSON.parse(str).items[0];
-				console.log(video.id.videoId)
-				cache = this.readcache()
+				enmapcache.clear()
+				cache = await this.readcache()
+				console.log(cache[0])
 					if(video.id.videoId != cache[0]) {
 						console.log("no match")
 						this.writecache(video.id.videoId)
+						this.announceVideo(video,client)
 					}
 					else {
 						console.log("match")
 					}
-				// if(video.id.videoId != cache[settings.channel]) {
-					// this.announceVideo(video, settings.channel);
-					// this.writecache(video.id.videoId, settings.channel);
-					// client.logger.log(`[YOUTUBE] Found ${video.id.videoId} - ${video.snippet.title}`);
-				// }
 			} catch (e) {
 				console.log(e, str);
 			}
@@ -46,32 +43,23 @@ exports.checkvideo = () => {
 	req.end();
 };
 
-exports.announceVideo = (video,channel) => {
-	const data = {
-		username: config.embed.username,
-		avatar_url: config.embed.avatar,
-		embeds: [
-			{
-				color: config.colors[channel],
-				title: video.snippet.title,
-				image: video.snippet.thumbnails.high,
-				url: `https://youtu.be/${video.id.videoId}`,
-				footer: {
-					text: config.embed.footer
-				}
-			}
-		]
-	};
+exports.announceVideo = async (video,client) => {
+	var embed = new Discord.MessageEmbed()
+	    // .setAuthor(`${message.author.username}#${message.author.discriminator}`, message.author.avatarURL)
+	    .addField(`test`)
+	    .setTimestamp()
+	    // .setFooter(`${message.client.user.username}#${message.client.user.discriminator}`, message.client.user.avatarURL)
+
+	// client.channels.cache.find(c => c.name === settings.modLogChannel).send(``,{embed}).catch(console.error);
+	// console.log(client.channels.cache.find(c => c.name === settings.modLogChannel))
+	console.log(client.guilds.get)
 };
 
-exports.readcache = () => {
-	return new Promise(resolve => {
-		data = enmapcache.fetchEverything().array();
-    	resolve(data)	    
-	});
+exports.readcache = async () => {
+	return await enmapcache.fetchEverything().array();    
 };
 
-exports.writecache = (data) => {
+exports.writecache = async (data) => {
 	enmapcache.clear()
 	enmapcache.set('youtube', data)
 };

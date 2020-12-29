@@ -55,8 +55,6 @@ client.mutes = new Enmap({name: "mutes"});
 // we need to wrap stuff in an anonymous function. It's annoying but it works.
 
 const init = async () => {
-  // readys the youtube upload cache
-  await Youtube.checkvideo()
   // Here we load **commands** into memory, as a collection, so they're accessible
   // here and everywhere else.
   const cmdFiles = await readdir("./commands/");
@@ -91,9 +89,15 @@ const init = async () => {
   client.login(client.config.token);
 
 // End top-level async/await function.
+
 };
 
 init();
+
+console.log(client.config)
+
+// Youtube.checkvideo(client)
+
 
 client.setInterval(() => {
     bans = client.bans.fetchEverything()
