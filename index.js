@@ -32,6 +32,10 @@ client.logger = require("./modules/Logger");
 // the bot, like logs and elevation features.
 require("./modules/functions.js")(client);
 
+// Loads the youtube upload handler
+Youtube = require('./modules/Youtube');
+
+
 // Aliases and commands are put in collections where they can be read from,
 // catalogued, listed, etc.
 client.commands = new Enmap();
@@ -45,11 +49,14 @@ client.bans = new Enmap({name: "bans"});
 client.mutes = new Enmap({name: "mutes"});
 
 
+
+
 // We're doing real fancy node 8 async/await stuff here, and to do that
 // we need to wrap stuff in an anonymous function. It's annoying but it works.
 
 const init = async () => {
-
+  // readys the youtube upload cache
+  await Youtube.checkvideo()
   // Here we load **commands** into memory, as a collection, so they're accessible
   // here and everywhere else.
   const cmdFiles = await readdir("./commands/");
@@ -88,7 +95,7 @@ const init = async () => {
 
 init();
 
-  client.setInterval(() => {
+client.setInterval(() => {
     bans = client.bans.fetchEverything()
     mutes = client.mutes.fetchEverything()
 
@@ -114,4 +121,5 @@ init();
           // unban command
         }
       });
-  }, 5000);
+}, 5000);
+
