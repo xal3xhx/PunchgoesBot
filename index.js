@@ -41,6 +41,9 @@ client.aliases = new Enmap();
 // essentially saves a collection to disk. This is great for per-server configs,
 // and makes things extremely easy for this purpose.
 client.settings = new Enmap({name: "settings"});
+client.bans = new Enmap({name: "bans"});
+client.mutes = new Enmap({name: "mutes"});
+
 
 // We're doing real fancy node 8 async/await stuff here, and to do that
 // we need to wrap stuff in an anonymous function. It's annoying but it works.
@@ -84,3 +87,31 @@ const init = async () => {
 };
 
 init();
+
+  client.setInterval(() => {
+    bans = client.bans.fetchEverything()
+    mutes = client.mutes.fetchEverything()
+
+      mutes.forEach(r => {
+        let guild = client.guilds.get(r.guild);
+        if(!guild) return;
+        let member = guild.members.get(r.snowflake);
+        if(!member) return;
+
+        if(Date.now() > r.unmutedAt) {
+          let role = member.roles.find(r => r.name === client.settings.mutedRole);
+          if(role) member.removeRole(role.id).catch(()=>{});
+        }
+      });
+
+      bans.forEach(r => {
+        let guild = client.guilds.get(r.guild);
+        if(!guild) return;
+        let member = guild.members.get(r.snowflake);
+        if(!member) return;
+
+        if(Date.now() > r.unbanAt) {
+          // unban command
+        }
+      });
+  }, 5000);

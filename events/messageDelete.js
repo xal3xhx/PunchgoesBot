@@ -35,6 +35,6 @@ module.exports = async (client, message) => {
 	    .setTimestamp()
 	    .setFooter(`${message.client.user.username}#${message.client.user.discriminator}`, message.client.user.avatarURL)
   }
-  await message.guild.channels.cache.find(c => c.name === modLogChannel).send(``,{embed}).catch(console.error);
+  await message.guild.channels.cache.find(c => c.name === settings.modLogChannel).send(``,{embed}).catch(console.error);
   // A message created by **${message.author.username}#${message.author.discriminator}** was just deleted in ${message.channel}
 };
