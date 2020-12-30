@@ -94,9 +94,10 @@ const init = async () => {
 
 init();
 
-console.log(client.config)
+client.setInterval(() => {
+Youtube.rss(client)
 
-// Youtube.checkvideo(client)
+}, 5000);
 
 
 client.setInterval(() => {

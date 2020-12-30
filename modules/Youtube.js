@@ -1,65 +1,44 @@
-const http = require('https');
-const fs = require('fs');
-const util = require('util');
-const Enmap = require("enmap");
-const enmapcache = new Enmap({name: "youtube cache"});
 const config = require("../config.js");
-const Discord = require('discord.js')
+const Discord = require('discord.js');
+const startAt = Date.now();
+const Parser = require("rss-parser");
+const lastVideos = {};
+parser = new Parser({customFields: {item: [['media:group', 'media', {keepArray: true}],]}})
 settings = config
 
-exports.checkvideo = async (client) => {
-	const req = http.request({
-		hostname: `www.googleapis.com`,
-		port: 443,
-		path: `/youtube/v3/search?part=snippet&channelId=${settings.channel}&maxResults=1&order=date&type=video&key=${settings.google}`,
-		method: `GET`
-	}, res => {
-		let str = '';
-		res.on('data', chunk => {
-			str += chunk;
-		});
-		res.on('end', async () => {
-			try {
-				const video = JSON.parse(str).items[0];
-				enmapcache.clear()
-				cache = await this.readcache()
-				console.log(cache[0])
-					if(video.id.videoId != cache[0]) {
-						console.log("no match")
-						this.writecache(video.id.videoId)
-						this.announceVideo(video,client)
-					}
-					else {
-						console.log("match")
-					}
-			} catch (e) {
-				console.log(e, str);
-			}
-		});
-	});
-	req.on('error', e => {
-		console.log(e);
-	});
-	req.end();
+exports.getLastVideo = async (youtubeChannelName, rssURL, client) => {
+    let content = await parser.parseURL(rssURL);
+    let tLastVideos = content.items.sort((a, b) => {
+        let aPubDate = new Date(a.pubDate || 0).getTime();
+        let bPubDate = new Date(b.pubDate || 0).getTime();
+        return bPubDate - aPubDate;
+    });
+    client.logger.log(`[${youtubeChannelName}]  | The last video is "${tLastVideos[0] ? tLastVideos[0].title : "err"}"`, "youtube");
+    return tLastVideos[0];
 };
 
-exports.announceVideo = async (video,client) => {
-	var embed = new Discord.MessageEmbed()
-	    // .setAuthor(`${message.author.username}#${message.author.discriminator}`, message.author.avatarURL)
-	    .addField(`test`)
-	    .setTimestamp()
-	    // .setFooter(`${message.client.user.username}#${message.client.user.discriminator}`, message.client.user.avatarURL)
-
-	// client.channels.cache.find(c => c.name === settings.modLogChannel).send(``,{embed}).catch(console.error);
-	// console.log(client.channels.cache.find(c => c.name === settings.modLogChannel))
-	console.log(client.guilds.get)
+exports.checkVideos = async (youtubeChannelName, rssURL, client) => {
+    let lastVideo = await this.getLastVideo(youtubeChannelName, rssURL, client);
+    if(!lastVideo) return client.logger.log(`[ERR] | No video found for ${lastVideo}`, "youtube");
+    if(new Date(lastVideo.pubDate).getTime() < startAt) return client.logger.log(`[${youtubeChannelName}] | Last video was uploaded before the bot starts`, "youtube");
+    let lastSavedVideo = lastVideos[youtubeChannelName];
+    if(lastSavedVideo && (lastSavedVideo.id === lastVideo.id)) return client.logger.log(`[${youtubeChannelName}] | Last video is the same as the last saved`, "youtube");
+    return lastVideo;
 };
 
-exports.readcache = async () => {
-	return await enmapcache.fetchEverything().array();    
+exports.rss = async (client) => {
+	const youtubeChannelName = "punchgoesbig"
+	let video = await this.checkVideos(youtubeChannelName, `https://www.youtube.com/feeds/videos.xml?channel_id=${settings.channel}`, client);
+	if(!video) return client.logger.log(`[${youtubeChannelName}] | No notification`, "youtube");
+	this.announceVideo(video, client)
 };
 
-exports.writecache = async (data) => {
-	enmapcache.clear()
-	enmapcache.set('youtube', data)
+exports.announceVideo = async (video, client) => {
+	// const embed = new Discord.MessageEmbed()
+	// 	.setAuthor(`[PunchgoesBig] | ${video.title}`)
+	// 	.setThumbnail(video.media[0]['media:thumbnail'][0]['$']['url'])
+	// 	.setColor("RED")
+	// 	.setTimestamp()
+
+	client.channels.cache.find(c => c.name === settings.defaultSettings.modLogChannel).send(`@everyone PuncH just uploaded a new video, go give it some love! ${video.link}`);
 };

@@ -32,6 +32,6 @@
     "inquirer": "^7.1.0",
     "moment": "^2.24.0",
     "moment-duration-format": "^2.3.2",
-    "youtube-notification": "^1.1.0"
+    "rss-parser": "^3.10.0"
   }
 }
