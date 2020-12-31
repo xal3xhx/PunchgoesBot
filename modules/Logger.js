@@ -28,6 +28,9 @@ exports.log = (content, type = "log") => {
     case "youtube": {
       return console.log(`${timestamp} ${chalk.bgHex('#EF5B3C')(type.toUpperCase())} ${content}`);
     }
+    case "Twitch": {
+      return console.log(`${timestamp} ${chalk.bgHex('#26CAFF')(type.toUpperCase())} ${content}`);
+    }
     default: throw new TypeError("Logger type must be either warn, debug, log, ready, cmd or error.");
   }
 }; 

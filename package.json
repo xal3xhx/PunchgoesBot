@@ -32,6 +32,7 @@
     "inquirer": "^7.1.0",
     "moment": "^2.24.0",
     "moment-duration-format": "^2.3.2",
-    "rss-parser": "^3.10.0"
+    "rss-parser": "^3.10.0",
+    "twitch-api-v5": "^2.0.4"
   }
 }

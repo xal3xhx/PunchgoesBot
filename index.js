@@ -35,6 +35,9 @@ require("./modules/functions.js")(client);
 // Loads the youtube upload handler
 Youtube = require('./modules/Youtube');
 
+Twitch = require('./modules/Twitch');
+
+
 
 // Aliases and commands are put in collections where they can be read from,
 // catalogued, listed, etc.
@@ -95,8 +98,11 @@ const init = async () => {
 init();
 
 client.setInterval(() => {
-Youtube.rss(client)
+Twitch.checkStream(client)
+}, 1000);
 
+client.setInterval(() => {
+Youtube.rss(client)
 }, 5000);
 
 
