@@ -3,13 +3,20 @@ const config = {
   "ownerID": "",
 
   // Bot Admins, level 9 by default. Array of user ID strings.
-  "admins": [],
+  "admins": [""],
 
   // Bot Support, level 8 by default. Array of user ID strings
   "support": [],
 
   // Your Bot's Token. Available on https://discord.com/developers/applications/me
   "token": "",
+
+  // The youtube channel id for upload annousments
+  "channel": "",
+
+  // The twitch api key for Stream annousments
+  "twitchkey": "",
+
 
   // Intents the bot needs.
   // By default GuideBot needs Guilds, Guild Messages and Direct Messages to work.
@@ -36,6 +43,8 @@ const config = {
     "welcomeEnabled": "false",
     "welcomeChannel": "welcome",
     "modLogChannel": "mod-log",
+    "streamchannel": "stream-announcements",
+    "youtubechannel": "upload-announcements",
     "blacklist": ['cunt']
   },
 
