@@ -55,5 +55,5 @@ exports.announceStream = async (video, client) => {
 	// 	.setColor("RED")
 	// 	.setTimestamp()
 
-	client.channels.cache.find(c => c.name === settings.defaultSettings.streamchannel).send(`@everyone PuncH is live onver on twitch! It looks like were playing *${stream.stream.game}* tonight! ${stream.stream.channel.url}`);
+	client.channels.cache.find(c => c.name === settings.defaultSettings.streamchannel).send(`@everyone PuncH is live over on twitch! It looks like were playing *${stream.stream.game}* tonight! ${stream.stream.channel.url}`);
 };
