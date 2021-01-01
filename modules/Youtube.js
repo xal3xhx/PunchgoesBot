@@ -40,5 +40,5 @@ exports.announceVideo = async (video, client) => {
 	// 	.setColor("RED")
 	// 	.setTimestamp()
 
-	client.channels.cache.find(c => c.name === settings.defaultSettings.modLogChannel).send(`@everyone PuncH just uploaded a new video, go give it some love! ${video.link}`);
+	client.channels.cache.find(c => c.name === settings.defaultSettings.youtubechannel).send(`@everyone PuncH just uploaded a new video, go give it some love! ${video.link}`);
 };
