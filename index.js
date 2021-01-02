@@ -103,7 +103,7 @@ Twitch.checkStream(client)
 
 client.setInterval(() => {
 Youtube.rss(client)
-}, 5000);
+}, 1000);
 
 
 client.setInterval(() => {
