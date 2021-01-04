@@ -2,12 +2,14 @@ const config = require("../config.js");
 const Discord = require('discord.js');
 const api = require('twitch-api-v5');
 const startAt = Date.now();
-var streaming = false
+let streaming = false
 
 api.clientID = config.twitchkey;
-// punch id: 141189217
 
-// api.users.usersByName({ users: 'admiralbahroo' }, (err, res) => {
+// punch id: 141189217
+// mine: 83530625
+
+// api.users.usersByName({ users: 'thelosthacker' }, (err, res) => {
 //     if(err) {
 //         return null
 //     } else {
@@ -17,7 +19,7 @@ api.clientID = config.twitchkey;
 
 exports.getStreamInfo = async () => {
 	return await new Promise((resolve, reject) => {
-		api.streams.channel({ channelID: '40972890' }, (err, res) => {
+		api.streams.channel({ channelID: '141189217' }, (err, res) => {
 	    if(err) {
 	        return null
 	    } else {

@@ -6,6 +6,8 @@ const Discord = require("discord.js");
 
 module.exports = async (client, message, newMessage) => {
   if (message.author.bot) return; // ignore bots
+  if (message.attachments.first()) return; // ignores attachments
+
   const settings = message.settings = client.getSettings(message.guild); // pulls settings
   if (message.guild && !message.member) await message.guild.members.fetch(message.author); // fetch invisible users
   

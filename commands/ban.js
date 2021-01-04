@@ -3,8 +3,8 @@ exports.run = async (client, message, [target, ...res], level) => { // eslint-di
   const settings = message.settings = client.getSettings(message.guild); // pulls settings
   const args = message.content.split(' ').slice(1);
   //let user = await message.guild.member(message.mentions.users.first()) || await message.guild.members.fetch(target).catch(() => console.log('Error')) || null;
-	const user = message.mentions.users.first();
-	const reason = args.slice(1).join(' ');
+  const user = message.mentions.users.first();
+  const reason = args.slice(1).join(' ');
 	
 	//Check if user is here.
 	if(!user) {
@@ -18,36 +18,29 @@ exports.run = async (client, message, [target, ...res], level) => { // eslint-di
 		}
 	}
 	if(user === message.author) return message.channel.send("Don't ban yourself nerd");
-	if(!reason) return message.channel.send("Please provide a reason with this punishment!");
+	if(!reason) reason = "No reason given."//return message.channel.send("Please provide a reason with this punishment!");
 	if(!message.guild.member(user).bannable) return message.channel.send("Cannot ban this user!");
 	
-	await message.guild.member(user).ban();
+	// await message.guild.member(user).ban();
 
-	message.channel.send("User was banned");
-	
-	const Discord = require('discord.js');
-	const embed = new Discord.MessageEmbed()
-	.setAuthor(`Banned by **${message.author.username}#${message.author.discriminator}**`, message.author.displayAvatarURL)
-	.setThumbnail(user.displayAvatarURL)
-	.setColor("RED")
-	.setTimestamp()
-	.setDescription(`**Action**: Ban
-	**User**: ${user.username}#${user.discriminator} (${user.id})
-	**Reason**: ${reason}`)
-	message.guild.channels.cache.find(c => c.name === settings.modLogChannel).send(``,{embed}).catch(console.error);
+	let by = `${message.author.username}#${message.author.discriminator}`
+	let formated = `${user.username}#${user.discriminator} (${user.id})`
+	await client.moderation("ban", by, formated, reason, message, settings);
+
 };
+
 exports.conf = {
-  enabled: true,
-  guildOnly: false,
-  aliases: [],
-  permLevel: "Administrator"
+	enabled: true,
+	guildOnly: false,
+	aliases: [],
+	permLevel: "Administrator"
 };
 
 exports.help = {
-  name: "ban",
-  category: "management",
-  description: "ban",
-  usage: "ban"
+	name: "ban",
+	category: "management",
+	description: "ban",
+	usage: "ban"
 };
 
 

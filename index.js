@@ -50,9 +50,15 @@ client.aliases = new Enmap();
 client.settings = new Enmap({name: "settings"});
 client.bans = new Enmap({name: "bans"});
 client.mutes = new Enmap({name: "mutes"});
+client.modcase = new Enmap({name: "modcase"});
 
 
-
+// some awesome code to make .setinterval asyncable
+const setIntervalAsync = (fn, ms) => {
+  fn().then(() => {
+    setTimeout(() => setIntervalAsync(fn, ms), ms);
+  });
+};
 
 // We're doing real fancy node 8 async/await stuff here, and to do that
 // we need to wrap stuff in an anonymous function. It's annoying but it works.
@@ -97,15 +103,14 @@ const init = async () => {
 
 init();
 
-client.setInterval(() => {
-Twitch.checkStream(client)
-}, 1000);
-
-client.setInterval(() => {
-Youtube.rss(client)
-}, 1000);
+// checks for youtube and twitch uploads/streams 
+setIntervalAsync(() => Twitch.checkStream(client), 1000)
+setIntervalAsync(() => Youtube.rss(client), 2000)
 
 
+
+
+// goes over the list of bans and mutes to see if they will be unbaned/muted
 client.setInterval(() => {
     bans = client.bans.fetchEverything()
     mutes = client.mutes.fetchEverything()

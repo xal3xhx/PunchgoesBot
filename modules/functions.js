@@ -1,3 +1,5 @@
+const Discord = require('discord.js');
+
 module.exports = (client) => {
 
   /*
@@ -25,14 +27,71 @@ module.exports = (client) => {
     return permlvl;
   };
 
-  /*
-  GUILD SETTINGS FUNCTION
-
-  This function merges the default settings (from config.defaultSettings) with any
-  guild override you might have for particular guild. If no overrides are present,
-  the default settings are used.
-
-  */
+  // used to keep track and log of moderation commands.
+  // autonumbers cases and logs them in the database
+  // also sends a message to the mod-log channel
+  client.moderation = async (action, by, user, reason, message, settings, pardon = "", pardoned = false) => { // have to do some weird stuff to pass the content properly...
+    content = `{action: ${action}, by: ${by}, user: ${user}, reason: ${reason}, pardon: ${pardon}, pardoned: ${pardoned}, messageid = ""}`
+    additional = ""
+    switch(action) {
+      case "ban": {
+        actionformated = "banned by:"
+        casenum = client.modcase.autonum
+        client.logger.log(content)
+        client.modcase.set(casenum, content)
+        break
+      }
+      case "kick": {
+        actionformated = "kicked by:"
+        casenum = client.modcase.autonum
+        client.logger.log(content)
+        client.modcase.set(casenum, content)
+        break
+      }
+      case "warn": {
+        actionformated = "warned by:"
+        casenum = client.modcase.autonum
+        client.logger.log(content)
+        client.modcase.set(casenum, content)
+        break
+      }
+      case "mute": {
+        actionformated = "muted by:"
+        casenum = client.modcase.autonum
+        client.logger.log(content)
+        client.modcase.set(casenum, content)
+        break
+      }
+      case "tempban": {
+        actionformated = "temp banned by:"
+        casenum = client.modcase.autonum
+        additional = `**unban at**: ${pardon} \n **pardoned**: ${pardoned}`
+        client.logger.log(content)
+        client.modcase.set(casenum, content)
+        break
+      }
+      case "tempmute": {
+        actionformated = "warned by:"
+        casenum = client.modcase.autonum
+        additional = `**unmute at**: ${pardon} \n **pardoned**: ${pardoned}`
+        client.logger.log(content)
+        client.modcase.set(casenum, content)
+        break
+      }
+    }
+    const embed = new Discord.MessageEmbed()
+      .setAuthor(`${actionformated} ${by}`)
+      .setColor("RED")
+      .setDescription(`
+      **Case Number**: ${casenum}
+      **Action**: ${action}
+      **User**: ${user}
+      **Reason**: ${reason}
+      ${additional}`)
+      .setTimestamp()
+    log = await message.guild.channels.cache.find(c => c.name === settings.modLogChannel).send(``,{embed}).catch(console.error);
+    client.modcase.set(casenum, log.id, "messageid")
+};
   
   // THIS IS HERE BECAUSE SOME PEOPLE DELETE ALL THE GUILD SETTINGS
   // And then they're stuck because the default settings are also gone.

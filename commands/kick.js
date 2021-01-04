@@ -1,10 +1,10 @@
 exports.run = async (client, message, [target, ...res], level) => { // eslint-disable-line no-unused-vars
-    if (message.author.bot) return; // ignore bots
+  if (message.author.bot) return; // ignore bots
   const settings = message.settings = client.getSettings(message.guild); // pulls settings
   const args = message.content.split(' ').slice(1);
   //let user = await message.guild.member(message.mentions.users.first()) || await message.guild.members.fetch(target).catch(() => console.log('Error')) || null;
-	const user = message.mentions.users.first();
-	const reason = args.slice(1).join(' ');
+  const user = message.mentions.users.first();
+  const reason = args.slice(1).join(' ');
 	
 	//Check if user is here.
 	if(!user) {
@@ -18,38 +18,30 @@ exports.run = async (client, message, [target, ...res], level) => { // eslint-di
 		}
 	}
 	if(user === message.author) return message.channel.send("Don't kick yourself nerd");
-	if(!reason) return message.channel.send("Please provide a reason with this punishment!");
+	if(!reason) reason = "No reason given."//return message.channel.send("Please provide a reason with this punishment!");
 	if(!message.guild.member(user).kickable) return message.channel.send("Cannot kick this user!");
 	
-	await message.guild.member(user).kick();
+	// await message.guild.member(user).kick();
 
-	message.channel.send("User was Kicked");
+	let by = `${message.author.username}#${message.author.discriminator}`
+	let formated = `${user.username}#${user.discriminator} (${user.id})`
+	await client.moderation("kick", by, formated, reason, message, settings);
 	
-	const Discord = require('discord.js');
-	const embed = new Discord.MessageEmbed()
-	.setAuthor(`Kicked by **${message.author.username}#${message.author.discriminator}**`, message.author.displayAvatarURL)
-	.setThumbnail(user.displayAvatarURL)
-	.setColor("RED")
-	.setTimestamp()
-	.setDescription(`**Action**: Kick
-	**User**: ${user.username}#${user.discriminator} (${user.id})
-	**Reason**: ${reason}`)
-	message.guild.channels.cache.find(c => c.name === settings.modLogChannel).send(``,{embed}).catch(console.error);
-  };
+};
   
-  exports.conf = {
-    enabled: true,
-    guildOnly: false,
-    aliases: [],
-    permLevel: "Discord Mod"
-  };
-  
-  exports.help = {
-    name: "kick",
-    category: "management",
-    description: "kick",
-    usage: "kick"
-  };
+exports.conf = {
+  enabled: true,
+  guildOnly: false,
+  aliases: [],
+  permLevel: "Discord Mod"
+};
+
+exports.help = {
+  name: "kick",
+  category: "management",
+  description: "kick",
+  usage: "kick"
+};
   
   
   
