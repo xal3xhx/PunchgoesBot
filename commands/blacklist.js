@@ -3,7 +3,7 @@
 
 exports.run = async (client, message, [action, ...value], level) => { // eslint-disable-line no-unused-vars
   
-  const settings = message.settings;
+  const settings = message.settings = client.getSettings(message.guild);
   const current = settings.blacklist
   const joinedValue = value.join(" ");
 

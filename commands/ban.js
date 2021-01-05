@@ -21,7 +21,7 @@ exports.run = async (client, message, [target, ...res], level) => { // eslint-di
 	if(!reason) reason = "No reason given."//return message.channel.send("Please provide a reason with this punishment!");
 	if(!message.guild.member(user).bannable) return message.channel.send("Cannot ban this user!");
 	
-	// await message.guild.member(user).ban();
+	await message.guild.member(user).ban();
 
 	let by = `${message.author.username}#${message.author.discriminator}`
 	let formated = `${user.username}#${user.discriminator} (${user.id})`
