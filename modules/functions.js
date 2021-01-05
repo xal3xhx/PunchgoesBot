@@ -31,7 +31,8 @@ module.exports = (client) => {
   // autonumbers cases and logs them in the database
   // also sends a message to the mod-log channel
   client.moderation = async (action, by, user, reason, message, settings, pardon = "", pardoned = false) => { // have to do some weird stuff to pass the content properly...
-    content = `{action: ${action}, by: ${by}, user: ${user}, reason: ${reason}, pardon: ${pardon}, pardoned: ${pardoned}, messageid = ""}`
+    content = `{"action": "${action}", "by": "${by}", "user": "${user}", "reason": "${reason}", "pardon": "${pardon}", "pardoned": "${pardoned}", "messageid": ""}`
+    content = JSON.parse(content)
     additional = ""
     switch(action) {
       case "ban": {
