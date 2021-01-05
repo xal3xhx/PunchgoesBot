@@ -104,8 +104,8 @@ const init = async () => {
 init();
 
 // checks for youtube and twitch uploads/streams 
-setIntervalAsync(() => Twitch.checkStream(client), 1000)
-setIntervalAsync(() => Youtube.rss(client), 2000)
+/*setIntervalAsync(() => Twitch.checkStream(client), 1000)
+setIntervalAsync(() => Youtube.rss(client), 2000)*/
 
 
 
