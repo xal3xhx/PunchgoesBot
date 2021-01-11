@@ -27,18 +27,13 @@ exports.checkVideos = async (youtubeChannelName, rssURL, client) => {
 };
 
 exports.rss = async (client) => {
-	const youtubeChannelName = "punchgoesbig"
-	let video = await this.checkVideos(youtubeChannelName, `https://www.youtube.com/feeds/videos.xml?channel_id=${settings.channel}`, client);
-	if(!video) return client.logger.log(`[${youtubeChannelName}] | No notification`, "youtube");
-	this.announceVideo(video, client)
+    const youtubeChannelName = "punchgoesbig"
+    let video = await this.checkVideos(youtubeChannelName, `https://www.youtube.com/feeds/videos.xml?channel_id=${settings.channel}`, client);
+    if(!video) return client.logger.log(`[${youtubeChannelName}] | No notification`, "youtube");
+    lastVideos[youtubeChannelName] = video;
+    this.announceVideo(video, client)
 };
 
 exports.announceVideo = async (video, client) => {
-	// const embed = new Discord.MessageEmbed()
-	// 	.setAuthor(`[PunchgoesBig] | ${video.title}`)
-	// 	.setThumbnail(video.media[0]['media:thumbnail'][0]['$']['url'])
-	// 	.setColor("RED")
-	// 	.setTimestamp()
-
-	client.channels.cache.find(c => c.name === settings.defaultSettings.youtubechannel).send(`@everyone PuncH just uploaded a new video, go give it some love! ${video.link}`);
+    return await client.channels.cache.find(c => c.name === settings.defaultSettings.youtubechannel).send(`@everyone PuncH just uploaded a new video, go give it some love! ${video.link}`);
 };

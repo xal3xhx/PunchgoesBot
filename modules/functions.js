@@ -30,8 +30,8 @@ module.exports = (client) => {
   // used to keep track and log of moderation commands.
   // autonumbers cases and logs them in the database
   // also sends a message to the mod-log channel
-  client.moderation = async (action, by, user, reason, message, settings, pardon = "", pardoned = false) => { // have to do some weird stuff to pass the content properly...
-    content = `{"action": "${action}", "by": "${by}", "user": "${user}", "reason": "${reason}", "pardon": "${pardon}", "pardoned": "${pardoned}", "messageid": ""}`
+  client.moderation = async (action, by, username, userid, reason, message, settings, pardon = "", pardoned = false) => { // have to do some weird stuff to pass the content properly...
+    content = `{"action": "${action}", "by": "${by}", "username": "${username}", "userid": "${userid}", "reason": "${reason}", "pardon": "${pardon}", "pardoned": "${pardoned}", "messageid": ""}`
     content = JSON.parse(content)
     additional = ""
     switch(action) {
@@ -69,14 +69,16 @@ module.exports = (client) => {
         additional = `**unban at**: ${pardon} \n **pardoned**: ${pardoned}`
         client.logger.log(content)
         client.modcase.set(casenum, content)
+        client.bans.set(casenum, `{"casenum": "${casenum}", "guild": "${message.guild.id}", "userid": "${user.id}", "unbanAt": "${pardon}"}`)
         break
       }
       case "tempmute": {
-        actionformated = "warned by:"
+        actionformated = "temp muted by:"
         casenum = client.modcase.autonum
         additional = `**unmute at**: ${pardon} \n **pardoned**: ${pardoned}`
         client.logger.log(content)
         client.modcase.set(casenum, content)
+        client.mutes.set(casenum, `{"casenum": "${casenum}", "guild": "${message.guild.id}", "userid": "${user.id}", "unmuteAt": "${pardon}"}`)
         break
       }
     }
@@ -86,7 +88,7 @@ module.exports = (client) => {
       .setDescription(`
       **Case Number**: ${casenum}
       **Action**: ${action}
-      **User**: ${user}
+      **User**: ${username} (${userid})
       **Reason**: ${reason}
       ${additional}`)
       .setTimestamp()

@@ -1,10 +1,12 @@
-exports.run = async (client, message, [target, ...res], level) => { // eslint-disable-line no-unused-vars
+exports.run = async (client, message, [target, ...reason], level) => { // eslint-disable-line no-unused-vars
   if (message.author.bot) return; // ignore bots
   const settings = message.settings = client.getSettings(message.guild); // pulls settings
-  const args = message.content.split(' ').slice(1);
-  //let user = await message.guild.member(message.mentions.users.first()) || await message.guild.members.fetch(target).catch(() => console.log('Error')) || null;
-  const user = message.mentions.users.first();
-  const reason = args.slice(1).join(' ');
+  if(!target) return message.reply("you must provide a user or id.") // makes sure you gave a target
+  user = await message.guild.member(message.mentions.users.first()) || await message.guild.members.fetch(target).catch(() => console.log('Error'))
+  if(!user) message.reply("Couldn't find a user with that ID!"); // confirms the user was found
+  user = user.user
+  if(user === message.author) return message.channel.send("you cant kick yourself.");
+  if(reason == "") reason = "No reason given."
 	
 	//Check if user is here.
 	if(!user) {
@@ -24,8 +26,8 @@ exports.run = async (client, message, [target, ...res], level) => { // eslint-di
 	await message.guild.member(user).kick();
 
 	let by = `${message.author.username}#${message.author.discriminator}`
-	let formated = `${user.username}#${user.discriminator} (${user.id})`
-	await client.moderation("kick", by, formated, reason, message, settings);
+	let username = `${user.username}#${user.discriminator}`
+	await client.moderation("kick", by, username, user.id, reason, message, settings);
 	
 };
   
@@ -33,14 +35,14 @@ exports.conf = {
   enabled: true,
   guildOnly: false,
   aliases: [],
-  permLevel: "Discord Mod"
+  permLevel: "Twitch Mod"
 };
 
 exports.help = {
   name: "kick",
-  category: "management",
-  description: "kick",
-  usage: "kick"
+  category: "moderation",
+  description: "kicks a given user",
+  usage: "kick {user} [reason]"
 };
   
   

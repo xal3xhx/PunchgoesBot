@@ -37,6 +37,9 @@ Youtube = require('./modules/Youtube');
 
 Twitch = require('./modules/Twitch');
 
+Pardon = require('./modules/Pardon');
+
+
 
 
 // Aliases and commands are put in collections where they can be read from,
@@ -103,44 +106,104 @@ const init = async () => {
 
 init();
 
-// checks for youtube and twitch uploads/streams 
-<<<<<<< HEAD
-// setIntervalAsync(() => Twitch.checkStream(client), 1000)
-// setIntervalAsync(() => Youtube.rss(client), 2000)
-=======
-/*setIntervalAsync(() => Twitch.checkStream(client), 1000)
-setIntervalAsync(() => Youtube.rss(client), 2000)*/
->>>>>>> 3f79d2e1f934f3373b7a322e2aee8032382edb24
 
+client.setInterval(() => {
+  // Youtube.rss(client)
+  // Twitch.checkStream(client)
+},2000)
 
+// setIntervalAsync(() => Twitch.checkStream(client), 5000)
+// setIntervalAsync(() => Youtube.rss(client), 5000)
 
 
 // goes over the list of bans and mutes to see if they will be unbaned/muted
 client.setInterval(() => {
-    bans = client.bans.fetchEverything()
-    mutes = client.mutes.fetchEverything()
+  bans = client.bans.fetchEverything()
+  mutes = client.mutes.fetchEverything()
 
-      mutes.forEach(r => {
-        let guild = client.guilds.get(r.guild);
-        if(!guild) return;
-        let member = guild.members.get(r.snowflake);
-        if(!member) return;
+  mutes.forEach(async (r) => {
+    r = JSON.parse(r)
+    let guild = await client.guilds.cache.get(r.guild);
+    if(!guild) return;
+    let member = await guild.members.fetch(r.userid);
+    if(!member) return;
 
-        if(Date.now() > r.unmutedAt) {
-          let role = member.roles.find(r => r.name === client.settings.mutedRole);
-          if(role) member.removeRole(role.id).catch(()=>{});
-        }
-      });
+    if(Date.now() > new Date(r.unmuteAt).valueOf()) {
 
-      bans.forEach(r => {
-        let guild = client.guilds.get(r.guild);
-        if(!guild) return;
-        let member = guild.members.get(r.snowflake);
-        if(!member) return;
+      value = r.casenum
+      settings = client.getSettings(guild)
 
-        if(Date.now() > r.unbanAt) {
-          // unban command
-        }
-      });
-}, 5000);
+      username = `${member.user.username}#${member.user.discriminator}`
+      console.log(`unmuted: ${username}`)
+      
+      let mutedRole = member.roles.cache.find(r => r.name === settings.mutedRole);
+      guild.members.cache.get(member.id).roles.remove(mutedRole);
+
+      client.mutes.delete(value)    
+
+      currrentcase = client.modcase.get(value)
+      updated = await client.modcase.update(value, {"pardoned": true} ) // updates the database with the new reason
+      await client.modcase.set(String(value), updated)
+
+      modchannel = await guild.channels.cache.find(c => c.name === settings.modLogChannel)
+      oldmessage = await modchannel.messages.fetch(currrentcase.messageid)
+
+      description = String(oldmessage.embeds[0].description)
+      author = oldmessage.embeds[0].author.name
+      const regex = /\*\*pardoned\*\*:.*/i;
+      description = description.replace(regex, `pardoned: true`)
+      let embed = new Discord.MessageEmbed()
+        .setAuthor(`${author}`)
+        .setColor("RED")
+        .setDescription(`${description}`)
+        .setTimestamp()
+
+      oldmessage.edit(embed)
+    }
+  });
+
+  bans.forEach(async (r) => {
+    r = JSON.parse(r)
+    let guild = await client.guilds.cache.get(r.guild);
+    if(!guild) return;
+    let member = await guild.members.fetch(r.userid);
+    if(!member) return;
+
+    if(Date.now() > new Date(r.unbanAt).valueOf()) {
+
+      value = r.casenum
+      settings = client.getSettings(guild)
+
+      username = `${member.user.username}#${member.user.discriminator}`
+      console.log(`unbanned: ${username}`)
+
+      guild.fetchBans().then(bans=> {
+        if(bans.size == 0) return 
+        let bUser = bans.find(b => b.user.id == r.userid)
+        if(!bUser) return
+        guild.members.unban(bUser.user)
+      })
+      client.bans.delete(value)    
+
+      currrentcase = client.modcase.get(value)
+      updated = await client.modcase.update(value, {"pardoned": true} ) // updates the database with the new reason
+      await client.modcase.set(String(value), updated)
+
+      modchannel = await guild.channels.cache.find(c => c.name === settings.modLogChannel)
+      oldmessage = await modchannel.messages.fetch(currrentcase.messageid)
+
+      description = String(oldmessage.embeds[0].description)
+      author = oldmessage.embeds[0].author.name
+      const regex = /\*\*pardoned\*\*:.*/i;
+      description = description.replace(regex, `pardoned: true`)
+      let embed = new Discord.MessageEmbed()
+        .setAuthor(`${author}`)
+        .setColor("RED")
+        .setDescription(`${description}`)
+        .setTimestamp()
+
+      oldmessage.edit(embed)
+    }
+  });
+}, 2000);
 

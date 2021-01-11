@@ -9,14 +9,6 @@ api.clientID = config.twitchkey;
 // punch id: 141189217
 // mine: 83530625
 
-// api.users.usersByName({ users: 'thelosthacker' }, (err, res) => {
-//     if(err) {
-//         return null
-//     } else {
-//     	console.log(res.users[0]['_id'])
-//     }
-// });
-
 exports.getStreamInfo = async () => {
 	return await new Promise((resolve, reject) => {
 		api.streams.channel({ channelID: '141189217' }, (err, res) => {
@@ -30,32 +22,17 @@ exports.getStreamInfo = async () => {
 };
    
 exports.checkStream = async (client) => {
-	/*
-	game: stream.stream.game
-	title: stream.stream.channel.status
-	*/
-
-
 	stream = await this.getStreamInfo()
 	if(!stream.stream) {
 		streaming = false
 		return client.logger.log("Stream is not live.", "Twitch")
 	}
-	if(stream.stream) {
-    	if(new Date(stream.stream.created_at).getTime() < startAt) return client.logger.log(`Stream was already live when the bot was started!`, "Twitch");
-		if (streaming == true) return client.logger.log("Stream is Live, not sending notifaction.", "Twitch")
+	else {
+		if (streaming) return client.logger.log("Stream is Live, not sending notifaction.", "Twitch")
 		streaming = true
+    	if(new Date(stream.stream.created_at).getTime() < startAt) return client.logger.log(`Stream was already live when the bot was started!`, "Twitch");
+		if (stream.stream.game == "") return client.logger.log("No game found.", "Twitch")
 		client.logger.log("Stream is Live, sending notifaction!", "Twitch")
-		this.announceStream(stream, client)
+		return await client.channels.cache.find(c => c.name === settings.defaultSettings.streamchannel).send(`@ everyone PuncH is live over on twitch! It looks like we’re playing *${stream.stream.game}* tonight! ${stream.stream.channel.url}`);
 	}
-};
-
-exports.announceStream = async (video, client) => {
-	// const embed = new Discord.MessageEmbed()
-	// 	.setAuthor(`[PunchgoesBig] | ${video.title}`)
-	// 	.setThumbnail(video.media[0]['media:thumbnail'][0]['$']['url'])
-	// 	.setColor("RED")
-	// 	.setTimestamp()
-
-	client.channels.cache.find(c => c.name === settings.defaultSettings.streamchannel).send(`@everyone PuncH is live over on twitch! It looks like we’re playing *${stream.stream.game}* tonight! ${stream.stream.channel.url}`);
 };

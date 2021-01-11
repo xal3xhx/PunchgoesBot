@@ -1,6 +1,3 @@
-// this command allows you to add or remove new words to the server blacklist
-
-
 exports.run = async (client, message, [action, ...value], level) => { // eslint-disable-line no-unused-vars
   
   const settings = message.settings = client.getSettings(message.guild);
@@ -39,7 +36,7 @@ exports.conf = {
 
 exports.help = {
   name: "blacklist",
-  category: "Managment",
+  category: "moderation",
   description: "automaticly removes a users message and warns then if they say one of the blacklisted words.",
   usage: "blacklist [add/remove/view] {word}"
 };
