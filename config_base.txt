@@ -11,12 +11,9 @@ const config = {
   // Your Bot's Token. Available on https://discord.com/developers/applications/me
   "token": "",
 
-  // The youtube channel id for upload annousments
   "channel": "",
 
-  // The twitch api key for Stream annousments
   "twitchkey": "",
-
 
   // Intents the bot needs.
   // By default GuideBot needs Guilds, Guild Messages and Direct Messages to work.
@@ -36,6 +33,7 @@ const config = {
     "tmodRole": "Trial Mod",
     "tadminRole": "Trial Admin",
     "twitchMod": "Twitch Mod",
+    "SrMod": "SrMod",
     "SrAdmin": "SrAdmin",
     "severManager": "Manager",
     "systemNotice": "true", // This gives a notice when a user tries to run a command that they do not have permission to use.
@@ -60,19 +58,9 @@ const config = {
     },
 
     // This is your permission level, the staff levels should always be above the rest of the roles.
-    { level: 1,
-      name: "Trial Mod",
-      check: (message) => {
-        try {
-          const tmodRole = message.guild.roles.cache.find(r => r.name.toLowerCase() === message.settings.tmodRole.toLowerCase());
-          if (tmodRole && message.member.roles.cache.has(tmodRole.id)) return true;
-        } catch (e) {
-          return false;
-        }
-      }
-    },
+    
 
-    { level: 2,
+    { level: 1,
       // This is the name of the role.
       name: "Twitch Mod",
       // The following lines check the guild the message came from for the roles.
@@ -83,6 +71,18 @@ const config = {
         try {
           const twitchMod = message.guild.roles.cache.find(r => r.name.toLowerCase() === message.settings.twitchMod.toLowerCase());
           if (twitchMod && message.member.roles.cache.has(twitchMod.id)) return true;
+        } catch (e) {
+          return false;
+        }
+      }
+    },
+
+    { level: 2,
+      name: "Trial Mod",
+      check: (message) => {
+        try {
+          const tmodRole = message.guild.roles.cache.find(r => r.name.toLowerCase() === message.settings.tmodRole.toLowerCase());
+          if (tmodRole && message.member.roles.cache.has(tmodRole.id)) return true;
         } catch (e) {
           return false;
         }
@@ -107,6 +107,18 @@ const config = {
     },
 
     { level: 4,
+      name: "SrMod", 
+      check: (message) => {
+        try {
+          const SrMod = message.guild.roles.cache.find(r => r.name.toLowerCase() === message.settings.SrMod.toLowerCase());
+          return (SrMod && message.member.roles.cache.has(SrMod.id));
+        } catch (e) {
+          return false;
+        }
+      }
+    },
+
+    { level: 5,
       // This is the name of the role.
       name: "Trial Admin",
       // The following lines check the guild the message came from for the roles.
@@ -123,7 +135,7 @@ const config = {
       }
     },
 
-    { level: 5,
+    { level: 6,
       // This is the name of the role.
       name: "Admin",
       // The following lines check the guild the message came from for the roles.
@@ -140,7 +152,7 @@ const config = {
       }
     },
 
-    { level: 6,
+    { level: 7,
       name: "SrAdmin", 
       check: (message) => {
         try {
@@ -152,7 +164,7 @@ const config = {
       }
     },
 
-    { level: 7,
+    { level: 8,
       name: "Manager", 
       check: (message) => {
         try {

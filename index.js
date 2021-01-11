@@ -1,214 +1,204 @@
-const config = {
-  // Bot Owner, level 10 by default. A User ID. Should never be anything else than the bot owner's ID.
-  "ownerID": "",
+// This will check if the node version you are running is the required
+// Node version, if it isn't it will throw the following error to inform
+// you.
+if (Number(process.version.slice(1).split(".")[0]) < 12) throw new Error("Node 12.0.0 or higher is required. Update Node on your system.");
 
-  // Bot Admins, level 9 by default. Array of user ID strings.
-  "admins": [""],
+// Load up the discord.js library
+const Discord = require("discord.js");
+// We also load the rest of the things we need in this file:
+const { promisify } = require("util");
+const readdir = promisify(require("fs").readdir);
+const Enmap = require("enmap");
+const config = require("./config.js");
 
-  // Bot Support, level 8 by default. Array of user ID strings
-  "support": [],
+// This is your client. Some people call it `bot`, some people call it `self`,
+// some might call it `cootchie`. Either way, when you see `client.something`,
+// or `bot.something`, this is what we're referring to. Your client.
+const client = new Discord.Client({
+  ws: {
+    intents: config.intents
+  }
+});
 
-  // Your Bot's Token. Available on https://discord.com/developers/applications/me
-  "token": "",
+// Here we load the config file that contains our token and our prefix values.
+client.config = config
+// client.config.token contains the bot's token
+// client.config.prefix contains the message prefix
 
-  "google": "",
+// Require our logger
+client.logger = require("./modules/Logger");
 
-  "channel": "",
+// Let's start by getting some useful functions that we'll use throughout
+// the bot, like logs and elevation features.
+require("./modules/functions.js")(client);
 
-  "twitchkey": "",
-  // Intents the bot needs.
-  // By default GuideBot needs Guilds, Guild Messages and Direct Messages to work.
-  // For join messages to work you need Guild Members, which is privileged and requires extra setup.
-  // For more info about intents see the README.
-  intents: ["GUILDS","GUILD_MESSAGES","DIRECT_MESSAGES"],
+// Loads the youtube upload handler
+Youtube = require('./modules/Youtube');
 
-  // Default per-server settings. New guilds have these settings. 
+Twitch = require('./modules/Twitch');
 
-  // DO NOT LEAVE ANY OF THESE BLANK, AS YOU WILL NOT BE ABLE TO UPDATE THEM
-  // VIA COMMANDS IN THE GUILD.
-  
-  "defaultSettings" : {
-    "prefix": "~",
-    "modRole": "Discord Mod",
-    "adminRole": "Admin",
-    "tmodRole": "Trial Mod",
-    "tadminRole": "Trial Admin",
-    "twitchMod": "Twitch Mod",
-    "SrMod": "SrMod",
-    "SrAdmin": "SrAdmin",
-    "severManager": "Manager",
-    "systemNotice": "true", // This gives a notice when a user tries to run a command that they do not have permission to use.
-    "welcomeMessage": "Say hello to {{user}}, everyone! We all need a warm welcome sometimes :D",
-    "welcomeEnabled": "false",
-    "welcomeChannel": "welcome",
-    "modLogChannel": "mod-log",
-    "streamchannel": "stream-announcements",
-    "youtubechannel": "upload-announcements",
-    "blacklist": ['cunt']
-  },
 
-  // PERMISSION LEVEL DEFINITIONS.
+// Aliases and commands are put in collections where they can be read from,
+// catalogued, listed, etc.
+client.commands = new Enmap();
+client.aliases = new Enmap();
 
-  permLevels: [
-    // This is the lowest permisison level, this is for non-roled users.
-    { level: 0,
-      name: "User", 
-      // Don't bother checking, just return true which allows them to execute any command their
-      // level allows them to.
-      check: () => true
-    },
+// Now we integrate the use of Evie's awesome EnMap module, which
+// essentially saves a collection to disk. This is great for per-server configs,
+// and makes things extremely easy for this purpose.
+client.settings = new Enmap({name: "settings"});
+client.bans = new Enmap({name: "bans"});
+client.mutes = new Enmap({name: "mutes"});
+client.modcase = new Enmap({name: "modcase"});
 
-    // This is your permission level, the staff levels should always be above the rest of the roles.
-    
 
-    { level: 1,
-      // This is the name of the role.
-      name: "Twitch Mod",
-      // The following lines check the guild the message came from for the roles.
-      // Then it checks if the member that authored the message has the role.
-      // If they do return true, which will allow them to execute the command in question.
-      // If they don't then return false, which will prevent them from executing the command.
-      check: (message) => {
-        try {
-          const twitchMod = message.guild.roles.cache.find(r => r.name.toLowerCase() === message.settings.twitchMod.toLowerCase());
-          if (twitchMod && message.member.roles.cache.has(twitchMod.id)) return true;
-        } catch (e) {
-          return false;
-        }
-      }
-    },
-
-    { level: 2,
-      name: "Trial Mod",
-      check: (message) => {
-        try {
-          const tmodRole = message.guild.roles.cache.find(r => r.name.toLowerCase() === message.settings.tmodRole.toLowerCase());
-          if (tmodRole && message.member.roles.cache.has(tmodRole.id)) return true;
-        } catch (e) {
-          return false;
-        }
-      }
-    },
-
-    { level: 3,
-      // This is the name of the role.
-      name: "Discord Mod",
-      // The following lines check the guild the message came from for the roles.
-      // Then it checks if the member that authored the message has the role.
-      // If they do return true, which will allow them to execute the command in question.
-      // If they don't then return false, which will prevent them from executing the command.
-      check: (message) => {
-        try {
-          const modRole = message.guild.roles.cache.find(r => r.name.toLowerCase() === message.settings.modRole.toLowerCase());
-          if (modRole && message.member.roles.cache.has(modRole.id)) return true;
-        } catch (e) {
-          return false;
-        }
-      }
-    },
-
-    { level: 4,
-      name: "SrMod", 
-      check: (message) => {
-        try {
-          const SrMod = message.guild.roles.cache.find(r => r.name.toLowerCase() === message.settings.SrMod.toLowerCase());
-          return (SrMod && message.member.roles.cache.has(SrMod.id));
-        } catch (e) {
-          return false;
-        }
-      }
-    },
-
-    { level: 5,
-      // This is the name of the role.
-      name: "Trial Admin",
-      // The following lines check the guild the message came from for the roles.
-      // Then it checks if the member that authored the message has the role.
-      // If they do return true, which will allow them to execute the command in question.
-      // If they don't then return false, which will prevent them from executing the command.
-      check: (message) => {
-        try {
-          const tadminRole = message.guild.roles.cache.find(r => r.name.toLowerCase() === message.settings.tadminRole.toLowerCase());
-          if (tadminRole && message.member.roles.cache.has(tadminRole.id)) return true;
-        } catch (e) {
-          return false;
-        }
-      }
-    },
-
-    { level: 6,
-      // This is the name of the role.
-      name: "Admin",
-      // The following lines check the guild the message came from for the roles.
-      // Then it checks if the member that authored the message has the role.
-      // If they do return true, which will allow them to execute the command in question.
-      // If they don't then return false, which will prevent them from executing the command.
-      check: (message) => {
-        try {
-          const adminRole = message.guild.roles.cache.find(r => r.name.toLowerCase() === message.settings.adminRole.toLowerCase());
-          if (adminRole && message.member.roles.cache.has(adminRole.id)) return true;
-        } catch (e) {
-          return false;
-        }
-      }
-    },
-
-    { level: 7,
-      name: "SrAdmin", 
-      check: (message) => {
-        try {
-          const SrAdmin = message.guild.roles.cache.find(r => r.name.toLowerCase() === message.settings.SrAdmin.toLowerCase());
-          return (SrAdmin && message.member.roles.cache.has(SrAdmin.id));
-        } catch (e) {
-          return false;
-        }
-      }
-    },
-
-    { level: 8,
-      name: "Manager", 
-      check: (message) => {
-        try {
-          const severManager = message.guild.roles.cache.find(r => r.name.toLowerCase() === message.settings.severManager.toLowerCase());
-          return (severManager && message.member.roles.cache.has(severManager.id));
-        } catch (e) {
-          return false;
-        }
-      }
-    },
-
-    // This is the server owner.
-    { level: 15,
-      name: "Server Owner", 
-      // Simple check, if the guild owner id matches the message author's ID, then it will return true.
-      // Otherwise it will return false.
-      check: (message) => message.channel.type === "text" ? (message.guild.ownerID === message.author.id ? true : false) : false
-    },
-
-    // Bot Support is a special inbetween level that has the equivalent of server owner access
-    // to any server they joins, in order to help troubleshoot the bot on behalf of owners.
-    { level: 18,
-      name: "Bot Support",
-      // The check is by reading if an ID is part of this array. Yes, this means you need to
-      // change this and reboot the bot to add a support user. Make it better yourself!
-      check: (message) => config.support.includes(message.author.id)
-    },
-
-    // Bot Admin has some limited access like rebooting the bot or reloading commands.
-    { level: 19,
-      name: "Bot Admin",
-      check: (message) => config.admins.includes(message.author.id)
-    },
-
-    // This is the bot owner, this should be the highest permission level available.
-    // The reason this should be the highest level is because of dangerous commands such as eval
-    // or exec (if the owner has that).
-    { level: 20,
-      name: "Bot Owner", 
-      // Another simple check, compares the message author id to the one stored in the config file.
-      check: (message) => message.client.config.ownerID === message.author.id
-    }
-  ]
+// some awesome code to make .setinterval asyncable
+const setIntervalAsync = (fn, ms) => {
+  fn().then(() => {
+    setTimeout(() => setIntervalAsync(fn, ms), ms);
+  });
 };
 
-module.exports = config;
+// We're doing real fancy node 8 async/await stuff here, and to do that
+// we need to wrap stuff in an anonymous function. It's annoying but it works.
+
+const init = async () => {
+  // Here we load **commands** into memory, as a collection, so they're accessible
+  // here and everywhere else.
+  const cmdFiles = await readdir("./commands/");
+  client.logger.log(`Loading a total of ${cmdFiles.length} commands.`);
+  cmdFiles.forEach(f => {
+    if (!f.endsWith(".js")) return;
+    const response = client.loadCommand(f);
+    if (response) console.log(response);
+  });
+
+  // Then we load events, which will include our message and ready event.
+  const evtFiles = await readdir("./events/");
+  client.logger.log(`Loading a total of ${evtFiles.length} events.`);
+  evtFiles.forEach(file => {
+    const eventName = file.split(".")[0];
+    client.logger.log(`Loading Event: ${eventName}`);
+    const event = require(`./events/${file}`);
+    // Bind the client to any event, before the existing arguments
+    // provided by the discord.js event. 
+    // This line is awesome by the way. Just sayin'.
+    client.on(eventName, event.bind(null, client));
+  });
+
+  // Generate a cache of client permissions for pretty perm names in commands.
+  client.levelCache = {};
+  for (let i = 0; i < client.config.permLevels.length; i++) {
+    const thisLevel = client.config.permLevels[i];
+    client.levelCache[thisLevel.name] = thisLevel.level;
+  }
+
+  // Here we login the client.
+  client.login(client.config.token);
+
+// End top-level async/await function.
+
+};
+
+init();
+
+
+client.setInterval(() => {
+  Youtube.rss(client)
+  Twitch.checkStream(client)
+},2000)
+
+// setIntervalAsync(() => Twitch.checkStream(client), 5000)
+// setIntervalAsync(() => Youtube.rss(client), 5000)
+
+
+// goes over the list of bans and mutes to see if they will be unbaned/muted
+client.setInterval(() => {
+  bans = client.bans.fetchEverything()
+  mutes = client.mutes.fetchEverything()
+
+  mutes.forEach(async (r) => {
+    r = JSON.parse(r)
+    let guild = await client.guilds.cache.get(r.guild);
+    if(!guild) return;
+    let member = await guild.members.fetch(r.userid);
+    if(!member) return;
+
+    if(Date.now() > new Date(r.unmuteAt).valueOf()) {
+
+      value = r.casenum
+      settings = client.getSettings(guild)
+
+      username = `${member.user.username}#${member.user.discriminator}`
+      console.log(`unmuted: ${username}`)
+      
+      let mutedRole = member.roles.cache.find(r => r.name === settings.mutedRole);
+      guild.members.cache.get(member.id).roles.remove(mutedRole);
+
+      client.mutes.delete(value)    
+
+      currrentcase = client.modcase.get(value)
+      updated = await client.modcase.update(value, {"pardoned": true} ) // updates the database with the new reason
+      await client.modcase.set(String(value), updated)
+
+      modchannel = await guild.channels.cache.find(c => c.name === settings.modLogChannel)
+      oldmessage = await modchannel.messages.fetch(currrentcase.messageid)
+
+      description = String(oldmessage.embeds[0].description)
+      author = oldmessage.embeds[0].author.name
+      const regex = /\*\*pardoned\*\*:.*/i;
+      description = description.replace(regex, `pardoned: true`)
+      let embed = new Discord.MessageEmbed()
+        .setAuthor(`${author}`)
+        .setColor("RED")
+        .setDescription(`${description}`)
+        .setTimestamp()
+
+      oldmessage.edit(embed)
+    }
+  });
+
+  bans.forEach(async (r) => {
+    r = JSON.parse(r)
+    let guild = await client.guilds.cache.get(r.guild);
+    if(!guild) return;
+    let member = await guild.members.fetch(r.userid);
+    if(!member) return;
+
+    if(Date.now() > new Date(r.unbanAt).valueOf()) {
+
+      value = r.casenum
+      settings = client.getSettings(guild)
+
+      username = `${member.user.username}#${member.user.discriminator}`
+      console.log(`unbanned: ${username}`)
+
+      guild.fetchBans().then(bans=> {
+        if(bans.size == 0) return 
+        let bUser = bans.find(b => b.user.id == r.userid)
+        if(!bUser) return
+        guild.members.unban(bUser.user)
+      })
+      client.bans.delete(value)    
+
+      currrentcase = client.modcase.get(value)
+      updated = await client.modcase.update(value, {"pardoned": true} ) // updates the database with the new reason
+      await client.modcase.set(String(value), updated)
+
+      modchannel = await guild.channels.cache.find(c => c.name === settings.modLogChannel)
+      oldmessage = await modchannel.messages.fetch(currrentcase.messageid)
+
+      description = String(oldmessage.embeds[0].description)
+      author = oldmessage.embeds[0].author.name
+      const regex = /\*\*pardoned\*\*:.*/i;
+      description = description.replace(regex, `pardoned: true`)
+      let embed = new Discord.MessageEmbed()
+        .setAuthor(`${author}`)
+        .setColor("RED")
+        .setDescription(`${description}`)
+        .setTimestamp()
+
+      oldmessage.edit(embed)
+    }
+  });
+}, 2000);
