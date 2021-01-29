@@ -35,7 +35,7 @@ exports.conf = {
   enabled: true,
   guildOnly: false,
   aliases: [],
-  permLevel: "Twitch Mod"
+  permLevel: "Trial Mod"
 };
 
 exports.help = {

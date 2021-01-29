@@ -106,7 +106,7 @@ init();
 client.setInterval(() => {
   Youtube.rss(client)
   Twitch.checkStream(client)
-},2000)
+},10000)
 
 // setIntervalAsync(() => Twitch.checkStream(client), 5000)
 // setIntervalAsync(() => Youtube.rss(client), 5000)
